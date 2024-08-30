@@ -1,0 +1,9 @@
+{
+    "name": "LightningItemSlot",
+    "version_number": "0.0.1",
+    "website_url": "https://github.com/Shaosil/LethalCompanyMods-GeneralImprovements",
+    "description": "Fixes many bugs and adds many QoL improvements and optional tweaks. Very configurable.",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2100"
+    ]
+}

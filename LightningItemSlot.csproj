@@ -1,0 +1,102 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>LightningItemSlot</AssemblyName>
+        <Description>A template for Lethal Company</Description>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IncludeAssets="compile" />
+		<PackageReference Include="Krafs.Publicizer" Version="2.2.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    </ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="0Harmony">
+		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="BepInEx">
+		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\BepInEx.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.Netcode.Runtime">
+			<HintPath>DLLs\Unity.Netcode.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>DLLs\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>DLLs\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>DLLs\UnityEngine.AssetBundleModule.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
+			<HintPath>DLLs\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.InputSystem">
+			<HintPath>DLLs\Unity.InputSystem.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="DLLs\Unity.Netcode.Runtime.dll">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
+		<None Update="DLLs\Unity.TextMeshPro.dll">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
+		<None Update="DLLs\UnityEngine.UI.dll">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="API\" />
+	</ItemGroup>
+
+	<Target Name="CopyFilesToGamePath" AfterTargets="PostBuildEvent" Condition="$(Configuration) != 'Debug'">
+		<!-- Install the netcode-patcher CLI from here: https://github.com/EvaisaDev/UnityNetcodePatcher -->
+		<Message Text="Patching netcode..." Importance="high" />
+		<Exec Command="netcode-patch &quot;$(TargetPath)&quot; @(ReferencePathWithRefAssemblies->'&quot;%(Identity)&quot;', ' ')" />
+
+		<MakeDir Directories="$(GamePath)" />
+
+		<Message Text="Copying DLL to $(GamePath)..." Importance="high" />
+		<Exec Command="copy $(TargetPath) &quot;$(GamePath)&quot;" />
+
+		<Message Text="Copying assets to $(GamePath)..." Importance="high" />
+		<Exec Command="copy Assets\LightningItemSlotAssets &quot;$(GamePath)&quot;" />
+	</Target>
+
+	<Target Name="ZipMod" AfterTargets="PostBuildEvent" Condition="$(Configuration) == 'Deploy'">
+		<Message Text="Deleting $(PackageDir)..." Importance="high" />
+		<RemoveDir Directories="$(PackageDir)" />
+
+		<Message Text="Copying mod files to $(PackageDir)..." Importance="high" />
+		<Copy SourceFiles="$(TargetPath);Assets\LightningItemSlotAssets;icon.png;manifest.json;CHANGELOG.md;README.md" DestinationFolder="$(PackageDir)" />
+
+		<ZipDirectory SourceDirectory="$(PackageDir)" DestinationFile="..\PACKAGED\$(MSBuildProjectName).zip" Overwrite="true" />
+	</Target>
+</Project>
